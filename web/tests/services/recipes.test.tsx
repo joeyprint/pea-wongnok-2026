@@ -81,10 +81,25 @@ describe("Validate use get recipe from API", () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    // // Assert
+    // Assert
     expect(mockAxiosGetFn).toHaveBeenCalledWith("/recipes", {
       params: { page: 2 },
     });
     expect(result.current.data).toEqual(mockResults);
+  });
+
+  it('Should return "NETWORK ERROR" when API fail', async () => {
+    // Arrange
+    mockAxiosGetFn.mockRejectedValue(new Error("NETWORK ERROR"));
+
+    // Act
+    const { wrapper } = setUpTanStack();
+    const { result } = renderHook(() => useGetRecipes(), { wrapper });
+
+    // Assert
+    await waitFor(() => expect(result.current.isError).toBeTruthy());
+
+    expect(result.current.error?.message).toBe("NETWORK ERROR");
+    expect(result.current.data).toBeUndefined();
   });
 });
